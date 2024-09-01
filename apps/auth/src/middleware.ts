@@ -7,18 +7,38 @@ export default clerkMiddleware(async (auth, request) => {
   if (user.userId !== null) {
     // Check user attributes and redirect
     // if (user.samlAccounts.length > 0) {
+    // const res = await fetch(`https://api.clerk.com/v1/users/${user.userId}`, {
+    //   headers: {
+    //     Authorization: `Bearer ${process.env.CLERK_SECRET_KEY}`,
+    //   },
+    // });
+    // const data = await res.json();
+    // // console.log(data.saml_accounts.length);
+    // if (data.saml_accounts.length > 0) {
+    //   return Response.redirect(new URL(`${process.env.BUSINESS_URL}`));
+    // } else {
+    //   return Response.redirect(new URL(`${process.env.CONSUMER_URL}`));
+    // }
+
     const res = await fetch(`https://api.clerk.com/v1/users/${user.userId}`, {
       headers: {
         Authorization: `Bearer ${process.env.CLERK_SECRET_KEY}`,
       },
     });
     const data = await res.json();
-    // console.log(data.saml_accounts.length);
-    if (data.saml_accounts.length > 0) {
-      return Response.redirect(new URL(`${process.env.BUSINESS_URL}`));
-    } else {
-      return Response.redirect(new URL(`${process.env.CONSUMER_URL}`));
-    }
+
+    const url =
+      data.saml_accounts.length > 0
+        ? new URL(`${process.env.BUSINESS_URL}`)
+        : new URL(`${process.env.CONSUMER_URL}`);
+
+    // Return a new Response object with a redirect
+    return new Response(null, {
+      status: 302,
+      headers: {
+        Location: url.toString(),
+      },
+    });
   }
 });
 
